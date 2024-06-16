@@ -1,0 +1,26 @@
+[project]
+name = "grimoire"
+version = "0.1.0"
+description = "Write your own AI-powered personal language server"
+authors = [
+  { name = "Logan Walls", email = "2934282+LoganWalls@users.noreply.github.com" },
+]
+readme = "README.md"
+
+requires-python = ">=3.10"
+dependencies = [
+  "pynvim>=0.5.0",
+  "gitpython>=3.1.43",
+  "result>=0.17.0",
+  "pydantic>=2.7.4",
+]
+
+[project.optional-dependencies]
+dev = ["ruff>=0.4.9", "ipdb>=0.13.9", "ipython>=8.4.0", "pytest>=7.1.2"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.ruff.lint]
+ignore = ["F722"]

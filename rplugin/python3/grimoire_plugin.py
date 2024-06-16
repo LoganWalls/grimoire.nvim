@@ -19,6 +19,9 @@ class Grimoire:
 
     def __init__(self, nvim: Nvim):
         self.vim = nvim
+        self.vim.out_write("Grimoire loaded\n")
+        self.options = self.vim.exec_lua("return require('grimoire').options")
+        self.vim.out_write(str(self.options) + "\n")
         self.oai_client = OpenAI(
             api_key="sk-not-required",
             base_url="http://localhost:7777/v1",
@@ -29,7 +32,7 @@ class Grimoire:
         )
         self.current_completion = None
 
-    @pynvim.command("RequestCompletion", nargs="?")
+    @pynvim.command("GrimoireRequestCompletion", nargs="?")
     def request_completion(self, args: list):
         if self.busy:
             self.vim.out_write(
@@ -97,7 +100,7 @@ class Grimoire:
     def on_completion_accepted(self):
         self.accept_keymap.unregister()
 
-    @pynvim.autocmd("InsertLeave")
+    @pynvim.autocmd("InsertLeave", pattern="*")
     def on_insert_leave(self):
         if self.current_completion is not None:
             namespace.completion.clear(self.vim)

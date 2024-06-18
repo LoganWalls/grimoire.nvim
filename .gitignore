@@ -2,6 +2,7 @@ __pycache__
 secrets.py
 .ipynb_*
 .direnv
+.venv
 .rsyncignore
 .env
 scratch/

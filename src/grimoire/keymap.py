@@ -18,7 +18,7 @@ class Keymap:
 
         opts = dict(silent=True, noremap=True)
         if options:
-            opts.update(opts)
+            opts.update(options)
         self.vim.api.buf_set_keymap(buffer, self.mode, self.lhs, self.rhs, opts)
         self.is_set = True
 

@@ -10,7 +10,7 @@ from grimoire.keymap import Keymap
 
 
 @pynvim.plugin
-class Grimoire:
+class GrimoirePlugin:
     vim: Nvim
     oai_client: OpenAI
     busy: bool

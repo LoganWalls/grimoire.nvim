@@ -5,14 +5,26 @@ from pydantic import BaseModel
 import pynvim
 from openai import OpenAI, Stream
 from pynvim.api import Nvim
-from grimoire.context import CodePosition, get_buffer_context
-from grimoire.completion import StreamingCompletion
-from grimoire import completion, namespace
-from grimoire.keymap import Keymap
+from .context import CodePosition, get_buffer_context
+from .completion import StreamingCompletion
+from . import completion, namespace
+from .keymap import Keymap, KeymapDict
 
 
 class GrimoireKeys(BaseModel):
     accept_completion: str
+
+    def to_keymaps(self, vim: Nvim) -> KeymapDict:
+        return KeymapDict(
+            {
+                "accept_completion": Keymap(
+                    vim,
+                    "i",
+                    self.accept_completion,
+                    f"<CMD>{completion.ACCEPT_COMMAND}<CR>",
+                )
+            }
+        )
 
 
 class GrimoireOptions(BaseModel):
@@ -27,9 +39,9 @@ class GrimoireOptions(BaseModel):
 class GrimoirePlugin:
     vim: Nvim
     options: GrimoireOptions
+    keymaps: KeymapDict
     oai_client: OpenAI
     busy: bool
-    accept_keymap: Keymap
     seeds: list[int]
     current_completion: Optional[StreamingCompletion]
 
@@ -38,17 +50,12 @@ class GrimoirePlugin:
         self.options = GrimoireOptions.model_validate(
             self.vim.exec_lua("return require('grimoire').options")
         )
+        self.keymaps = self.options.keys.to_keymaps(self.vim)
         self.oai_client = OpenAI(
             api_key="sk-not-required",
             base_url=f"http://{self.options.host}:{self.options.port}/v1",
         )
         self.busy = False
-        self.accept_keymap = Keymap(
-            self.vim,
-            "i",
-            self.options.keys.accept_completion,
-            f"<CMD>{completion.ACCEPT_COMMAND}<CR>",
-        )
         random.seed(self.options.initial_seed)
         self.seeds = [
             random.randint(0, 999999) for _ in range(self.options.max_variants)
@@ -117,14 +124,14 @@ class GrimoirePlugin:
     @pynvim.autocmd("User", pattern=completion.FINISH_EVENT)
     def on_completion_finish(self):
         self.busy = False
-        self.accept_keymap.register()
+        self.keymaps.register()
 
     @pynvim.autocmd("User", pattern=completion.ACCEPT_EVENT)
     def on_completion_accepted(self):
-        self.accept_keymap.unregister()
+        self.keymaps.unregister()
 
     @pynvim.autocmd("InsertLeave", pattern="*")
     def on_insert_leave(self):
         if self.current_completion is not None:
             namespace.completion.clear(self.vim)
-        self.accept_keymap.unregister()
+        self.keymaps.unregister()

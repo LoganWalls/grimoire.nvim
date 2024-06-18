@@ -25,3 +25,13 @@ class Keymap:
         if self.is_set:
             self.vim.api.buf_del_keymap(buffer, "i", self.lhs)
             self.is_set = False
+
+
+class KeymapDict(dict[str, Keymap]):
+    def register(self, buffer: int = 0, options: Optional[dict] = None):
+        for v in self.values():
+            v.register(buffer=buffer, options=options)
+
+    def unregister(self, buffer: int = 0):
+        for v in self.values():
+            v.unregister(buffer=buffer)

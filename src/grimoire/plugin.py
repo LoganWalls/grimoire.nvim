@@ -1,4 +1,5 @@
 from typing import Iterator, Optional
+import random
 from openai.types.completion import Completion
 from pydantic import BaseModel
 import pynvim
@@ -18,7 +19,7 @@ class GrimoireOptions(BaseModel):
     host: str
     port: int
     initial_seed: int
-    max_seeds: int
+    max_variants: int
     keys: GrimoireKeys
 
 
@@ -29,6 +30,7 @@ class GrimoirePlugin:
     oai_client: OpenAI
     busy: bool
     accept_keymap: Keymap
+    seeds: list[int]
     current_completion: Optional[StreamingCompletion]
 
     def __init__(self, nvim: Nvim):
@@ -47,6 +49,10 @@ class GrimoirePlugin:
             self.options.keys.accept_completion,
             f"<CMD>{completion.ACCEPT_COMMAND}<CR>",
         )
+        random.seed(self.options.initial_seed)
+        self.seeds = [
+            random.randint(0, 999999) for _ in range(self.options.max_variants)
+        ]
         self.current_completion = None
 
     @pynvim.command("GrimoireRequestCompletion", nargs="?")

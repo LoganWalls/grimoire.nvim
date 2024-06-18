@@ -9,7 +9,7 @@ M.defaults = function()
 		host = "localhost",
 		port = 7777,
 		initial_seed = 1234,
-		max_seeds = 3,
+		max_variants = 3,
 		keys = {
 			accept_completion = "<cr>",
 		},

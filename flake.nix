@@ -38,11 +38,8 @@
             shellHook = ''
               if [ ! -d .venv ]; then
                 uv venv
+                uv pip install -e '.[dev]'
               fi
-              if [ -f requirements.txt ]; then
-                uv pip sync requirements.txt
-              fi
-              uv pip install -e '.[dev]'
               source .venv/bin/activate
             '';
           };

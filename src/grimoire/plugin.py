@@ -47,8 +47,8 @@ class GrimoirePlugin:
 
         position = CodePosition.from_cursor(self.vim)
         before, after = get_buffer_context(self.vim, position)
-        prompt = f"""[SUFFIX]{after}[PREFIX]{before}"""
-        stop = ["</s>", "[SUFFIX]"]
+        prompt = f"<｜fim▁begin｜>{before}<｜fim▁hole｜>{after}<｜fim▁end｜>"
+        stop = ["<｜end▁of▁sentence｜>", "<｜fim▁begin｜>"]
         match kind:
             case "line":
                 stop.append("\n")
@@ -63,7 +63,7 @@ class GrimoirePlugin:
         self.vim.api.exec_autocmds("User", dict(pattern=completion.PENDING_EVENT))
         stream = self.oai_client.completions.create(
             prompt=prompt,
-            model="codestral",
+            model="deepseek-coder-base",
             seed=1234,
             top_p=0.9,
             temperature=0.1,

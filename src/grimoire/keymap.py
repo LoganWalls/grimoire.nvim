@@ -13,7 +13,6 @@ class Keymap:
 
     def register(self, buffer: int = 0, options: Optional[dict] = None):
         if self.is_set:
-            self.vim.err_write(f"Keymap already set: {self}\n")
             return
 
         opts = dict(silent=True, noremap=True)

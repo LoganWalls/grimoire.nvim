@@ -1,5 +1,6 @@
 from typing import Iterator, Optional
 from openai.types.completion import Completion
+from pydantic import BaseModel
 import pynvim
 from openai import OpenAI, Stream
 from pynvim.api import Nvim
@@ -9,9 +10,22 @@ from grimoire import completion, namespace
 from grimoire.keymap import Keymap
 
 
+class GrimoireKeys(BaseModel):
+    accept_completion: str
+
+
+class GrimoireOptions(BaseModel):
+    host: str
+    port: int
+    initial_seed: int
+    max_seeds: int
+    keys: GrimoireKeys
+
+
 @pynvim.plugin
 class GrimoirePlugin:
     vim: Nvim
+    options: GrimoireOptions
     oai_client: OpenAI
     busy: bool
     accept_keymap: Keymap
@@ -19,16 +33,19 @@ class GrimoirePlugin:
 
     def __init__(self, nvim: Nvim):
         self.vim = nvim
-        self.vim.out_write("Grimoire loaded\n")
-        self.options = self.vim.exec_lua("return require('grimoire').options")
-        self.vim.out_write(str(self.options) + "\n")
+        self.options = GrimoireOptions.model_validate(
+            self.vim.exec_lua("return require('grimoire').options")
+        )
         self.oai_client = OpenAI(
             api_key="sk-not-required",
-            base_url="http://localhost:7777/v1",
+            base_url=f"http://{self.options.host}:{self.options.port}/v1",
         )
         self.busy = False
         self.accept_keymap = Keymap(
-            self.vim, "i", "<CR>", f"<CMD>{completion.ACCEPT_COMMAND}<CR>"
+            self.vim,
+            "i",
+            self.options.keys.accept_completion,
+            f"<CMD>{completion.ACCEPT_COMMAND}<CR>",
         )
         self.current_completion = None
 

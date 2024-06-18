@@ -7,11 +7,11 @@ M.defaults = function()
 	---@class GrimoireConfig
 	local options = {
 		host = "localhost",
-		port = 1234,
+		port = 7777,
 		initial_seed = 1234,
 		max_seeds = 3,
 		keys = {
-			accept = "<cr>",
+			accept_completion = "<cr>",
 		},
 	}
 	return options

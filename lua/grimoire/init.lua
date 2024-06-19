@@ -9,7 +9,7 @@ M.defaults = function()
 		host = "localhost",
 		port = 7777,
 		initial_seed = 1234,
-		max_variants = 3,
+		max_variants = 5,
 		keys = {
 			accept_completion = "<cr>",
 		},
@@ -36,6 +36,12 @@ M.setup = function(opts)
 	end, { silent = true })
 	vim.keymap.set("i", "<C-g>", function()
 		vim.cmd("GrimoireRequestCompletion paragraph")
+	end, { silent = true })
+	vim.keymap.set("i", "<C-,>", function()
+		vim.cmd("GrimoirePrevVariant")
+	end, { silent = true })
+	vim.keymap.set("i", "<C-.>", function()
+		vim.cmd("GrimoireNextVariant")
 	end, { silent = true })
 end
 
